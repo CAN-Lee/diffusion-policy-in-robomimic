@@ -1,77 +1,124 @@
-# 项目介绍
+# Project Overview
 
-[robomimic](https://robomimic.github.io/)是一个用于机器人模仿学习的框架，它提供了在机器人操作领域收集的大量示教数据集，以及用于从这些数据集中学习的离线学习算法。robomimic 旨在使机器人学习变得广泛可及和可复现，允许研究人员和从业人员公平地对任务和算法进行基准测试，并开发下一代机器人学习算法。
+[robomimic](https://robomimic.github.io/) is a framework for robot imitation learning that provides benchmark datasets, offline learning algorithms, and a reproducible platform for robotic manipulation research.
 
-![pull figure](https://robomimic.github.io/assets/images/gallery_logo.png)
+![robomimic](https://robomimic.github.io/assets/images/gallery_logo.png)
 
-**本次作业基于robomimic项目，旨在让学员学习robomimic框架，理解diffusion policy原理并补充关键代码。**
+This assignment aims to help you become familiar with the robomimic framework, understand the **Diffusion Policy** algorithm, and complete its core implementation.
 
-## 安装robomimic
+## Install robomimic
 
-参考robomimic[官方文档](https://robomimic.github.io/docs/introduction/installation.html)，其中robmimic无需下载，直接在本项目内安装即可。
+Follow the official [installation guide](https://robomimic.github.io/docs/introduction/installation.html). The robomimic source code is already included in this project, so no additional download is required.
 
-## 安装mujoco
+## Install MuJoCo
 
-参考[安装文档](https://gist.github.com/saratrajput/60b1310fe9d9df664f9983b38b50d5da)，一直执行到最后一步
+Follow the [installation guide](https://gist.github.com/saratrajput/60b1310fe9d9df664f9983b38b50d5da) until the final step:
 
-`python3 setting_state.py`
+```bash
+python3 setting_state.py
+```
 
-如果遇到ImportError: cannot import name 'load_model_from_xml' from 'mujoco_py' (unknown location)的报错，则卸载并重新安装mujoco-py
+If you encounter:
 
-`pip uninstall mujoco-py && pip install mujoco-py`
+```text
+ImportError: cannot import name 'load_model_from_xml' from 'mujoco_py'
+```
 
-如果遇到Cython.Compiler.Errors.CompileError的报错，则执行
+reinstall `mujoco-py`:
 
-`pip install "cython<3"`
+```bash
+pip uninstall mujoco-py
+pip install mujoco-py
+```
 
-## 安装diffusers
+If you encounter a `Cython.Compiler.Errors.CompileError`, install an older version of Cython:
 
-`pip install diffusers==0.11.1 huggingface_hub==0.25.0`
+```bash
+pip install "cython<3"
+```
 
-## 下载并查看Square任务数据集
+## Install Diffusers
 
-进入robomimic/scripts目录
+```bash
+pip install diffusers==0.11.1 huggingface_hub==0.25.0
+```
 
-`python download_datasets.py --tasks square --dataset_types ph --hdf5_types low_dim`
+## Download and Inspect the Square Dataset
 
-如果下载速度很慢，可以直接到[官网下载](https://robomimic.github.io/docs/datasets/robomimic_v0.1.html)
+From the `robomimic/scripts` directory, run:
 
-下载完成之后，数据存放在datasets/square/ph/low_dim_v141.hdf5下
+```bash
+python download_datasets.py --tasks square --dataset_types ph --hdf5_types low_dim
+```
 
-运行以下指令播放数据集并存为mp4文件
+If the download is slow, you can also download the dataset from the [official website](https://robomimic.github.io/docs/datasets/robomimic_v0.1.html).
 
-`python playback_dataset.py --dataset <data_path> --render_image_names agentview robot0_eye_in_hand --video_path /tmp/playback_dataset.mp4 --n 5`
+The dataset will be saved at:
 
-## 【Option】跑通bc训练
+```text
+datasets/square/ph/low_dim_v141.hdf5
+```
 
-`python generate_paper_configs.py --output_dir /tmp/experiment_results`
+To visualize several demonstrations and save them as an MP4:
 
-`python /path/to/robomimic/scripts/train.py --config /path/to/robomimic/exps/paper/core/lift/ph/low_dim/bc.json`
+```bash
+python playback_dataset.py \
+  --dataset <data_path> \
+  --render_image_names agentview robot0_eye_in_hand \
+  --video_path /tmp/playback_dataset.mp4 \
+  --n 5
+```
 
-## 新增diffusion policy
+## (Optional) Train a Behavior Cloning (BC) Baseline
 
-新增算法的教程详见[官方文档](https://robomimic.github.io/docs/tutorials/custom_algorithms.html#implementing-custom-algorithms)，本次作业完成了算法主体框架，需要学员自行补充代码，路径为robomimic/algo/diffusion_policy.py；
+```bash
+python generate_paper_configs.py --output_dir /tmp/experiment_results
+```
 
-将config文件填充完整（路径为robomimic/exps/shenlan/diffusion_policy.json），如训练数据路径、输出文件路径（不要放在本项目路径中，不然上传的作业文件太大）以及diffusion policy算法配置等。
+```bash
+python train.py --config exps/paper/core/lift/ph/low_dim/bc.json
+```
 
-diffusion policy原理详见[项目](https://diffusion-policy.cs.columbia.edu/)。
+## Implement Diffusion Policy
 
-## 训练
+Follow the official tutorial on [implementing custom algorithms](https://robomimic.github.io/docs/tutorials/custom_algorithms.html#implementing-custom-algorithms).
 
-完成diffsusion policy代码以及配置后，执行
+Complete the missing implementation in:
 
-`python train.py --config ../exps/shenlan/diffusion_policy.json`
+```text
+robomimic/algo/diffusion_policy.py
+```
 
-## 查看结果
+Then configure:
 
-执行指令，其中 `<experiment-log-dir>`是diffusion_policy.json中的输出文件路径，
+```text
+robomimic/exps/shenlan/diffusion_policy.json
+```
 
-`tensorboard --logdir <experiment-log-dir> --bind_all`
+including:
 
-输出文件结构详见[官方文档](https://robomimic.github.io/docs/tutorials/viewing_results.html)。
+- dataset path
+- output directory (**outside** the project directory)
+- Diffusion Policy hyperparameters
 
-## 作业要求
+For more details about the algorithm, refer to the [Diffusion Policy project page](https://diffusion-policy.cs.columbia.edu/).
 
-1. 理解并实现diffusion policy算法，完成后请提交源代码；
-2. 上传tensorboard训练结果截图，注明最终成功率；
-3. 有余力的学员可以基于robomimic框架，下载其他任务数据训练。
+## Train
+
+After completing the implementation and configuration, run:
+
+```bash
+python train.py --config ../exps/shenlan/diffusion_policy.json
+```
+
+## View Results
+
+Launch TensorBoard:
+
+```bash
+tensorboard --logdir <experiment-log-dir> --bind_all
+```
+
+where `<experiment-log-dir>` is the output directory specified in `diffusion_policy.json`.
+
+For the output directory structure, see the [official documentation](https://robomimic.github.io/docs/tutorials/viewing_results.html).
